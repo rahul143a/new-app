@@ -4,6 +4,7 @@ export declare const updateLead: import("@activepieces/pieces-framework").IActio
     lastName: import("@activepieces/pieces-framework").ShortTextProperty<false>;
     email: import("@activepieces/pieces-framework").ShortTextProperty<false>;
     phone: import("@activepieces/pieces-framework").ShortTextProperty<false>;
+    source: import("@activepieces/pieces-framework").ShortTextProperty<false>;
     status: import("@activepieces/pieces-framework").ShortTextProperty<false>;
     notes: import("@activepieces/pieces-framework").LongTextProperty<false>;
 }>;

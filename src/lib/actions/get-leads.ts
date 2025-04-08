@@ -1,61 +1,72 @@
 import { createAction, Property } from '@activepieces/pieces-framework';
-import axios, { AxiosError } from 'axios';
+import { LeadratAuth } from '../auth';
+import { Lead } from '../models';
+import axios from 'axios';
+import { LeadList } from '../types';
 
 export const getLeads = createAction({
   name: 'get_leads',
   displayName: 'Get Leads',
-  description: 'Retrieves leads from Leadrat CRM',
+  description: 'Retrieves a list of leads with optional filtering',
   props: {
     status: Property.ShortText({
-      displayName: 'Lead Status',
+      displayName: 'Status',
       description: 'Filter leads by status',
       required: false,
     }),
     source: Property.ShortText({
-      displayName: 'Lead Source',
+      displayName: 'Source',
       description: 'Filter leads by source',
       required: false,
     }),
     page: Property.Number({
-      displayName: 'Page Number',
+      displayName: 'Page',
       description: 'Page number for pagination',
       required: false,
       defaultValue: 1,
     }),
     limit: Property.Number({
-      displayName: 'Results Per Page',
-      description: 'Number of results per page',
+      displayName: 'Limit',
+      description: 'Number of items per page',
       required: false,
       defaultValue: 10,
     }),
   },
   async run(context) {
-    const auth = context.auth as { apiKey: string; baseUrl: string };
-    const { status, source, page, limit } = context.propsValue;
+    const { page = 1, limit = 10, status, source } = context.propsValue;
+    const auth = context.auth as LeadratAuth;
 
     try {
-      const params = new URLSearchParams();
-      if (status) params.append('status', status);
-      if (source) params.append('source', source);
-      if (page) params.append('page', page.toString());
-      if (limit) params.append('limit', limit.toString());
-
-      const response = await axios.get(
-        `${auth.baseUrl}/api/leads?${params.toString()}`,
+      const response = await axios.get<{ data: Lead[]; total: number }>(
+        `${auth.baseUrl}/api/leads`,
         {
           headers: {
             'Authorization': `Bearer ${auth.apiKey}`,
-            'Content-Type': 'application/json',
+          },
+          params: {
+            page,
+            limit,
+            status,
+            source,
           },
         }
       );
 
-      return response.data;
+      return {
+        success: true,
+        data: response.data
+      };
     } catch (error) {
-      if (error instanceof AxiosError) {
-        throw new Error(`Failed to get leads: ${error.message}`);
-      }
-      throw new Error('Failed to get leads: Unknown error occurred');
+      return {
+        success: false,
+        error: {
+          message: axios.isAxiosError(error) 
+            ? error.response?.data?.message || error.message
+            : 'An unexpected error occurred',
+          status: axios.isAxiosError(error) ? error.response?.status : 500,
+          details: axios.isAxiosError(error) ? error.response?.data : null
+        }
+      };
     }
   },
 }); 

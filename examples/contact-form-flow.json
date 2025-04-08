@@ -1,0 +1,37 @@
+{
+  "name": "Contact Form to Leadrat CRM",
+  "description": "Creates a lead in Leadrat CRM when a contact form is submitted",
+  "trigger": {
+    "name": "webhook",
+    "displayName": "Webhook",
+    "type": "webhook",
+    "props": {
+      "path": "contact-form"
+    }
+  },
+  "actions": [
+    {
+      "name": "create_lead",
+      "displayName": "Create Lead",
+      "type": "leadrat",
+      "props": {
+        "firstName": "{{trigger.body.firstName}}",
+        "lastName": "{{trigger.body.lastName}}",
+        "email": "{{trigger.body.email}}",
+        "phone": "{{trigger.body.phone}}",
+        "source": "Website Contact Form",
+        "notes": "{{trigger.body.message}}"
+      }
+    },
+    {
+      "name": "send_email",
+      "displayName": "Send Email",
+      "type": "email",
+      "props": {
+        "to": "{{trigger.body.email}}",
+        "subject": "Thank you for contacting us",
+        "body": "Dear {{trigger.body.firstName}}, thank you for contacting us. We have received your message and will get back to you soon."
+      }
+    }
+  ]
+} 

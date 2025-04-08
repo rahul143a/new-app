@@ -1,71 +1,114 @@
 # Leadrat CRM Piece for Activepieces
 
-This piece provides integration with Leadrat CRM, focusing on the leads module. It allows you to create, read, update, and delete leads in your Leadrat CRM instance.
+This piece allows you to interact with the Leadrat CRM API from Activepieces flows.
 
 ## Features
 
 - Create new leads
-- Retrieve leads with filtering options
+- Retrieve leads with filtering and pagination
 - Update existing leads
 - Delete leads
 
+## Installation
+
+### Option 1: Install from npm package
+
+```bash
+npm install @activepieces/piece-leadrat
+```
+
+### Option 2: Install from local package
+
+```bash
+npm install /path/to/activepieces-piece-leadrat-0.0.1.tgz
+```
+
 ## Authentication
 
-To use this piece, you'll need:
-1. Your Leadrat CRM API key
-2. Your Leadrat CRM instance URL (defaults to https://api.leadrat.com)
+To use this piece, you need to configure the following authentication parameters:
+
+- **API Key**: Your Leadrat CRM API key
+- **Base URL**: The base URL for your Leadrat CRM API (e.g., `https://api.leadrat.com`)
 
 ## Actions
 
 ### Create Lead
-Creates a new lead in Leadrat CRM with the following fields:
-- First Name (required)
-- Last Name (required)
-- Email (required)
-- Phone (required)
-- Source (required)
-- Status (defaults to "New")
-- Notes (optional)
+
+Creates a new lead in Leadrat CRM.
+
+**Required Fields:**
+- First Name
+- Last Name
+- Email
+- Phone
+- Source
+
+**Optional Fields:**
+- Status (default: "New")
+- Notes
 
 ### Get Leads
-Retrieves leads from Leadrat CRM with optional filtering:
-- Status filter
-- Source filter
-- Pagination support (page number and results per page)
+
+Retrieves a list of leads with optional filtering.
+
+**Optional Parameters:**
+- Status: Filter leads by status
+- Source: Filter leads by source
+- Page: Page number for pagination (default: 1)
+- Limit: Number of items per page (default: 10)
 
 ### Update Lead
-Updates an existing lead in Leadrat CRM:
-- Lead ID (required)
-- First Name (optional)
-- Last Name (optional)
-- Email (optional)
-- Phone (optional)
-- Status (optional)
-- Notes (optional)
+
+Updates an existing lead in Leadrat CRM.
+
+**Required Fields:**
+- Lead ID
+
+**Optional Fields:**
+- First Name
+- Last Name
+- Email
+- Phone
+- Source
+- Status
+- Notes
 
 ### Delete Lead
-Deletes a lead from Leadrat CRM:
-- Lead ID (required)
 
-## Installation
+Deletes a lead from Leadrat CRM.
 
-1. Install the piece in your Activepieces instance
-2. Configure authentication with your Leadrat CRM credentials
-3. Start using the actions in your flows
+**Required Fields:**
+- Lead ID
+
+## Example Flow
+
+1. Trigger: When a new contact form is submitted
+2. Action: Create Lead
+   - First Name: {{trigger.firstName}}
+   - Last Name: {{trigger.lastName}}
+   - Email: {{trigger.email}}
+   - Phone: {{trigger.phone}}
+   - Source: "Website Contact Form"
+   - Notes: {{trigger.message}}
 
 ## Development
 
+### Building the Piece
+
 ```bash
-# Install dependencies
 npm install
-
-# Build the piece
 npm run build
+```
 
-# Run tests
+### Testing
+
+```bash
 npm test
+```
 
-# Lint the code
+### Linting
+
+```bash
 npm run lint
 ```
 

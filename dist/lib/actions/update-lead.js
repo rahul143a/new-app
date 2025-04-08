@@ -1,31 +1,11 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateLead = void 0;
 const pieces_framework_1 = require("@activepieces/pieces-framework");
-const axios_1 = __importStar(require("axios"));
+const axios_1 = __importDefault(require("axios"));
 exports.updateLead = (0, pieces_framework_1.createAction)({
     name: 'update_lead',
     displayName: 'Update Lead',
@@ -56,9 +36,14 @@ exports.updateLead = (0, pieces_framework_1.createAction)({
             description: 'Phone number of the lead',
             required: false,
         }),
+        source: pieces_framework_1.Property.ShortText({
+            displayName: 'Source',
+            description: 'Source of the lead',
+            required: false,
+        }),
         status: pieces_framework_1.Property.ShortText({
-            displayName: 'Lead Status',
-            description: 'New status of the lead',
+            displayName: 'Status',
+            description: 'Status of the lead',
             required: false,
         }),
         notes: pieces_framework_1.Property.LongText({
@@ -68,8 +53,9 @@ exports.updateLead = (0, pieces_framework_1.createAction)({
         }),
     },
     async run(context) {
-        const auth = context.auth;
+        var _a, _b;
         const { leadId, ...updateData } = context.propsValue;
+        const auth = context.auth;
         try {
             const response = await axios_1.default.put(`${auth.baseUrl}/api/leads/${leadId}`, updateData, {
                 headers: {
@@ -80,10 +66,10 @@ exports.updateLead = (0, pieces_framework_1.createAction)({
             return response.data;
         }
         catch (error) {
-            if (error instanceof axios_1.AxiosError) {
-                throw new Error(`Failed to update lead: ${error.message}`);
+            if (axios_1.default.isAxiosError(error)) {
+                throw new Error(`Failed to update lead: ${((_b = (_a = error.response) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.message) || error.message}`);
             }
-            throw new Error('Failed to update lead: Unknown error occurred');
+            throw error;
         }
     },
 });

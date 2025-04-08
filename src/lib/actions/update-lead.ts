@@ -1,5 +1,6 @@
 import { createAction, Property } from '@activepieces/pieces-framework';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
+import { LeadratAuth, Lead } from '../types';
 
 export const updateLead = createAction({
   name: 'update_lead',
@@ -31,9 +32,14 @@ export const updateLead = createAction({
       description: 'Phone number of the lead',
       required: false,
     }),
+    source: Property.ShortText({
+      displayName: 'Source',
+      description: 'Source of the lead',
+      required: false,
+    }),
     status: Property.ShortText({
-      displayName: 'Lead Status',
-      description: 'New status of the lead',
+      displayName: 'Status',
+      description: 'Status of the lead',
       required: false,
     }),
     notes: Property.LongText({
@@ -43,11 +49,11 @@ export const updateLead = createAction({
     }),
   },
   async run(context) {
-    const auth = context.auth as { apiKey: string; baseUrl: string };
     const { leadId, ...updateData } = context.propsValue;
+    const auth = context.auth as LeadratAuth;
 
     try {
-      const response = await axios.put(
+      const response = await axios.put<Lead>(
         `${auth.baseUrl}/api/leads/${leadId}`,
         updateData,
         {
@@ -60,10 +66,10 @@ export const updateLead = createAction({
 
       return response.data;
     } catch (error) {
-      if (error instanceof AxiosError) {
-        throw new Error(`Failed to update lead: ${error.message}`);
+      if (axios.isAxiosError(error)) {
+        throw new Error(`Failed to update lead: ${error.response?.data?.message || error.message}`);
       }
-      throw new Error('Failed to update lead: Unknown error occurred');
+      throw error;
     }
   },
 }); 

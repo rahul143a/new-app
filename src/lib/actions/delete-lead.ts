@@ -1,5 +1,6 @@
 import { createAction, Property } from '@activepieces/pieces-framework';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
+import { LeadratAuth } from '../types';
 
 export const deleteLead = createAction({
   name: 'delete_lead',
@@ -13,26 +14,22 @@ export const deleteLead = createAction({
     }),
   },
   async run(context) {
-    const auth = context.auth as { apiKey: string; baseUrl: string };
     const { leadId } = context.propsValue;
+    const auth = context.auth as LeadratAuth;
 
     try {
-      const response = await axios.delete(
-        `${auth.baseUrl}/api/leads/${leadId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${auth.apiKey}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      await axios.delete(`${auth.baseUrl}/api/leads/${leadId}`, {
+        headers: {
+          'Authorization': `Bearer ${auth.apiKey}`,
+        },
+      });
 
-      return response.data;
+      return { success: true };
     } catch (error) {
-      if (error instanceof AxiosError) {
-        throw new Error(`Failed to delete lead: ${error.message}`);
+      if (axios.isAxiosError(error)) {
+        throw new Error(`Failed to delete lead: ${error.response?.data?.message || error.message}`);
       }
-      throw new Error('Failed to delete lead: Unknown error occurred');
+      throw error;
     }
   },
 }); 
