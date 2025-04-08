@@ -1,0 +1,302 @@
+openapi: 3.0.0
+info:
+  title: Leadrat CRM API
+  description: API for managing leads in Leadrat CRM
+  version: 1.0.0
+  contact:
+    name: Leadrat CRM Support
+    url: https://leadrat.com
+    email: support@leadrat.com
+
+servers:
+  - url: https://api.leadrat.com
+    description: Production server
+
+security:
+  - BearerAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Lead:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - email
+        - phone
+        - source
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the lead
+        firstName:
+          type: string
+          description: First name of the lead
+        lastName:
+          type: string
+          description: Last name of the lead
+        email:
+          type: string
+          format: email
+          description: Email address of the lead
+        phone:
+          type: string
+          description: Phone number of the lead
+        source:
+          type: string
+          description: Source of the lead (e.g., Website, Social Media)
+        status:
+          type: string
+          description: Current status of the lead
+          enum: [New, Contacted, Qualified, Lost, Won]
+          default: New
+        notes:
+          type: string
+          description: Additional notes about the lead
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    LeadList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Lead'
+        total:
+          type: integer
+          description: Total number of leads
+        page:
+          type: integer
+          description: Current page number
+        limit:
+          type: integer
+          description: Number of items per page
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error message
+        details:
+          type: object
+          description: Additional error details
+
+paths:
+  /api/leads:
+    post:
+      summary: Create a new lead
+      description: Creates a new lead in the CRM
+      operationId: createLead
+      tags:
+        - Leads
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Lead'
+      responses:
+        '201':
+          description: Lead created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lead'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    get:
+      summary: Get leads
+      description: Retrieves a list of leads with optional filtering
+      operationId: getLeads
+      tags:
+        - Leads
+      parameters:
+        - name: status
+          in: query
+          description: Filter leads by status
+          schema:
+            type: string
+            enum: [New, Contacted, Qualified, Lost, Won]
+        - name: source
+          in: query
+          description: Filter leads by source
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: List of leads retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadList'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/leads/{leadId}:
+    parameters:
+      - name: leadId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: ID of the lead
+
+    get:
+      summary: Get a lead by ID
+      description: Retrieves a specific lead by its ID
+      operationId: getLead
+      tags:
+        - Leads
+      responses:
+        '200':
+          description: Lead retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lead'
+        '404':
+          description: Lead not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update a lead
+      description: Updates an existing lead
+      operationId: updateLead
+      tags:
+        - Leads
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Lead'
+      responses:
+        '200':
+          description: Lead updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lead'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Lead not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete a lead
+      description: Deletes a lead from the CRM
+      operationId: deleteLead
+      tags:
+        - Leads
+      responses:
+        '204':
+          description: Lead deleted successfully
+        '404':
+          description: Lead not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error' 
